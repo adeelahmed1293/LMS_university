@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
-const User = require('../schemas/user');
+const User = require('../schemas/User');
+const Hod = require('../schemas/Hod');
+const Teacher = require('../schemas/Teacher');
+const Student = require('../schemas/Student');
 const jwt = require('jsonwebtoken');
-
-
 
 require('dotenv').config();
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -47,10 +48,6 @@ router.post('/signup', async (req, res) => {
   }
 });
 
-
-
-
-
 router.post('/login', async (req, res) => {
   const { email, password, role } = req.body;
 
@@ -77,6 +74,24 @@ router.post('/login', async (req, res) => {
       return res.status(403).json({ message: 'Access denied for selected role.' });
     }
 
+    // Check if profile is complete based on role
+    let profileComplete = false;
+    let profileId = null;
+
+    if (role === 'HOD') {
+      const hodProfile = await Hod.findOne({ userId: user._id });
+      profileComplete = !!hodProfile && hodProfile.profileComplete;
+      if (hodProfile) profileId = hodProfile._id;
+    } else if (role === 'INSTRUCTOR') {
+      const teacherProfile = await Teacher.findOne({ userId: user._id });
+      profileComplete = !!teacherProfile && teacherProfile.profileComplete;
+      if (teacherProfile) profileId = teacherProfile._id;
+    } else if (role === 'STUDENT') {
+      const studentProfile = await Student.findOne({ userId: user._id });
+      profileComplete = !!studentProfile && studentProfile.profileComplete;
+      if (studentProfile) profileId = studentProfile._id;
+    }
+
     // Generate JWT token
     const token = jwt.sign(
       {
@@ -97,6 +112,8 @@ router.post('/login', async (req, res) => {
         fullName: user.fullName,
         email: user.email,
         role: user.role,
+        profileComplete,
+        profileId
       },
     });
   } catch (err) {
@@ -104,7 +121,5 @@ router.post('/login', async (req, res) => {
     res.status(500).json({ message: 'Server error.' });
   }
 });
-
-
 
 module.exports = router;

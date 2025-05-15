@@ -44,7 +44,7 @@ const handleSubmit = async (e) => {
     localStorage.setItem("user", JSON.stringify(data.user));
 
     alert("Login successful!");
-    navigate("/dashboard"); // ✅ Redirect to dashboard or desired page
+    navigate("/profile");
   } catch (error) {
     alert(error.message);
   }

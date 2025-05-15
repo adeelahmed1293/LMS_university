@@ -1,18 +1,42 @@
-import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   
   // Check if user is on the home page
   const isHomePage = location.pathname === "/";
   
-  // Sample auth state - in a real app, this would come from your auth context/provider
+  // State to track if user is logged in
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
+  
+  // Check local storage for token on component mount and when location changes
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const userData = localStorage.getItem("user");
+    
+    if (token && userData) {
+      setIsLoggedIn(true);
+      setUser(JSON.parse(userData));
+    } else {
+      setIsLoggedIn(false);
+      setUser(null);
+    }
+  }, [location]);
   
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setIsLoggedIn(false);
+    setUser(null);
+    navigate("/");
   };
 
   return (
@@ -40,7 +64,7 @@ const Navbar = () => {
                   Dashboard
                 </Link>
                 <button 
-                  onClick={() => setIsLoggedIn(false)}
+                  onClick={handleLogout}
                   className={`px-4 py-2 rounded-lg ${isHomePage 
                     ? "bg-white text-blue-600" 
                     : "bg-blue-600 text-white"} hover:bg-blue-700 hover:text-white transition`}
@@ -106,7 +130,7 @@ const Navbar = () => {
                 </Link>
                 <button 
                   onClick={() => {
-                    setIsLoggedIn(false);
+                    handleLogout();
                     toggleMenu();
                   }}
                   className="block w-full text-left py-2 text-gray-800 hover:text-blue-600"

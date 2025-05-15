@@ -17,7 +17,7 @@ const userSchema = new Schema({
   },
   role: {
     type: String,
-    enum: ['STUDENT', 'INSTRUCTOR', 'ADMIN'],
+    enum: ['STUDENT', 'INSTRUCTOR', 'HOD'],
     default: 'STUDENT',
     required: true,
   },
@@ -34,6 +34,10 @@ const userSchema = new Schema({
     type: Boolean,
     required: true,
     default: false,
+  },
+  profileComplete: {
+    type: Boolean,
+    default: false
   }
 });
 

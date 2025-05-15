@@ -59,10 +59,34 @@ const SignupPage = () => {
       if (!response.ok) {
         throw new Error(data.message || "Something went wrong!");
       }
-      navigate("/login"); // ✅ navigate programmatically
-                  
+      
       alert("User registered successfully!");
-      // You can redirect or reset form here
+      
+      // Now login the user automatically
+      const loginResponse = await fetch("http://localhost:3000/user/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          role: formData.role,
+        }),
+      });
+      
+      const loginData = await loginResponse.json();
+      
+      if (!loginResponse.ok) {
+        throw new Error(loginData.message || "Auto login failed. Please login manually.");
+      }
+      
+      // Save token and user data in localStorage
+      localStorage.setItem("token", loginData.token);
+      localStorage.setItem("user", JSON.stringify(loginData.user));
+      
+      // Redirect to profile page
+      navigate("/profile");
     } catch (error) {
       alert(error.message);
     }
