@@ -1,45 +1,21 @@
-const mongoose = require('mongoose');
-const { Schema } = mongoose;
+import mongoose from "mongoose";
 
-const teacherSchema = new Schema({
-  userId: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-    unique: true
+const teacherSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    username: { type: String, required: true, unique: true },
+    surname: { type: String },
+    phoneno: { type: String },
+    address: { type: String },
+    image: { type: String }, // image URL or filename
+    gender: { type: String, enum: ["Male", "Female", "Other"] },
+    dateOfHire: { type: Date },
+    subjects: [{ type: String }],
+    dept_name: { type: String },
+    email: { type: String, required: true, unique: true },
+    createdPortals: [{ type: mongoose.Schema.Types.ObjectId, ref: "Portal" }],
   },
-  hodId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Hod',
-    required: true
-  },
-  department: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  subjects: [{
-    type: String,
-    required: true
-  }],
-  contactNumber: {
-    type: String,
-    required: true
-  },
- 
-  qualification: {
-    type: String,
-    required: true
-  },
-  profileComplete: {
-    type: Boolean,
-    default: false
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
-  
-});
+  { timestamps: true }
+);
 
-module.exports = mongoose.model('Teacher', teacherSchema); 
+export default mongoose.model("Teacher", teacherSchema);
