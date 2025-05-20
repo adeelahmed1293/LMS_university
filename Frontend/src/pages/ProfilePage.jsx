@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -15,10 +18,17 @@ const ProfilePage = () => {
     qualification: "",
     address: ""
   });
-
   const [previewImage, setPreviewImage] = useState(null);
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 3;
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
 
   useEffect(() => {
     // Get user data from localStorage
@@ -48,19 +58,11 @@ const ProfilePage = () => {
   }, [navigate]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
+    const { name, value, files } = e.target;
+    if (name === "profileImage") {
       setFormData(prev => ({
         ...prev,
-        profileImage: file
+        profileImage: files[0]
       }));
 
       // Create preview URL
@@ -68,7 +70,12 @@ const ProfilePage = () => {
       reader.onloadend = () => {
         setPreviewImage(reader.result);
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(files[0]);
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
     }
   };
 
@@ -82,51 +89,81 @@ const ProfilePage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("You need to be logged in");
+    if (!user) {
+      setMessage("User not found in localStorage.");
+      toast.error("User not found in localStorage.");
       return;
     }
 
-    const userData = JSON.parse(localStorage.getItem("user"));
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("You need to be logged in");
+      return;
+    }
+
+    // Create FormData object to send multipart/form-data
     const data = new FormData();
-    data.append("name", formData.name);
-    data.append("email", formData.email);
+    
+    // IMPORTANT FIX: Use user.id instead of user._id
+    // The login API returns id, not _id in the user object
+    data.append("user", user.id); 
+    
+    // Map form field names to backend expected names
     data.append("phone_number", formData.phoneNumber);
     data.append("gender", formData.gender);
     data.append("date_of_birth", formData.dateOfBirth);
     data.append("department_name", formData.departmentName);
     data.append("qualification", formData.qualification);
     data.append("address", formData.address);
+    
     if (formData.profileImage) {
       data.append("profile_image", formData.profileImage);
     }
 
     try {
-      // Use user.id instead of _id to match the login response structure
-      const response = await fetch(`http://localhost:3000/user/update-profile/${userData.id}`, {
-        method: "PUT",
+      // IMPORTANT FIX: Change the endpoint to match your API routes
+      const res = await fetch("http://localhost:3000/hod_profile", {
+        method: "POST",
         headers: {
+          // Only set Authorization header, Content-Type is automatically set by FormData
           Authorization: `Bearer ${token}`
         },
         body: data
       });
-
-      const result = await response.json();
-      if (!response.ok) {
-        throw new Error(result.message || "Profile update failed");
+      
+      if (res.ok) {
+        const responseData = await res.json();
+        console.log("Profile created successfully:", responseData);
+        
+        const updatedUser = {
+          ...user,
+          profileComplete: true,
+          profileId: responseData._id // Store the profile ID
+        };
+        
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        setMessage("Profile created successfully!");
+        toast.success("Profile created successfully!");
+        navigate("/dashboard");
+      } else {
+        // Get the error message from the backend
+        let errorText;
+        try {
+          const errorData = await res.json();
+          errorText = errorData.message || "Unknown error";
+        } catch (e) {
+          errorText = await res.text();
+        }
+        
+        console.error("Backend error response:", errorText);
+        console.log("Debug info - User ID:", user.id);
+        setMessage("Failed to create profile: " + errorText);
+        toast.error("Failed to create profile: " + errorText);
       }
-
-      const updatedUser = {
-        ...userData,
-        profileComplete: true
-      };
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-      alert("Profile updated successfully!");
-      navigate("/dashboard");
-    } catch (error) {
-      alert(error.message);
+    } catch (err) {
+      setMessage("Error: " + err.message);
+      toast.error("Error: " + err.message);
+      console.error("Network error:", err);
     }
   };
 
@@ -381,9 +418,8 @@ const ProfilePage = () => {
               type="file"
               name="profileImage"
               accept="image/*"
-              onChange={handleFileChange}
+              onChange={handleChange}
               className="hidden"
-              required={!previewImage}
             />
           </label>
           
@@ -424,6 +460,8 @@ const ProfilePage = () => {
     }
   };
 
+  if (!user) return <div>Loading...</div>;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 to-blue-50 py-12">
       <div className="container mx-auto px-4">
@@ -443,6 +481,8 @@ const ProfilePage = () => {
           <form onSubmit={handleSubmit} className="mt-8" encType="multipart/form-data">
             {renderCurrentStep()}
           </form>
+          {message && <p className="text-center text-green-600 mt-4">{message}</p>}
+          <ToastContainer />
         </motion.div>
       </div>
     </div>

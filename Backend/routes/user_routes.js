@@ -78,17 +78,18 @@ router.post('/login', async (req, res) => {
     let profileComplete = false;
     let profileId = null;
 
+    // FIX: Use correct query to find profile by user ID
     if (role === 'HOD') {
-      const hodProfile = await Hod.findOne({ userId: user._id });
-      profileComplete = !!hodProfile && hodProfile.profileComplete;
+      const hodProfile = await Hod.findOne({ user: user._id });
+      profileComplete = !!hodProfile;
       if (hodProfile) profileId = hodProfile._id;
     } else if (role === 'INSTRUCTOR') {
-      const teacherProfile = await Teacher.findOne({ userId: user._id });
-      profileComplete = !!teacherProfile && teacherProfile.profileComplete;
+      const teacherProfile = await Teacher.findOne({ user: user._id });
+      profileComplete = !!teacherProfile;
       if (teacherProfile) profileId = teacherProfile._id;
     } else if (role === 'STUDENT') {
-      const studentProfile = await Student.findOne({ userId: user._id });
-      profileComplete = !!studentProfile && studentProfile.profileComplete;
+      const studentProfile = await Student.findOne({ user: user._id });
+      profileComplete = !!studentProfile;
       if (studentProfile) profileId = studentProfile._id;
     }
 

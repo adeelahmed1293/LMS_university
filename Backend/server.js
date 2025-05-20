@@ -23,9 +23,7 @@ app.use(envChecker);
 connectDB();
 
 app.use('/user', user);
-app.use('/hod', hod);
-app.use('/teacher', teacher);
-app.use('/student', student);
+app.use('/hod_profile', hod);
 
 // Start Server
 const PORT = 3000;

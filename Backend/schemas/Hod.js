@@ -13,14 +13,14 @@ const hodSchema = new mongoose.Schema({
   },
   gender: {
     type: String,
-    enum: ['Male', 'Female', 'Other']
+    enum: ['male', 'female', 'other']
   },
   date_of_birth: {
     type: Date
   },
   profile_image: {
-    data: Buffer,
-    contentType: String
+    data: Buffer,              // Store binary data of the image
+    contentType: String        // Store the MIME type of the image
   },
   department_name: {
     type: String,
