@@ -59,9 +59,22 @@ const handleSubmit = async (e) => {
     toast.success("Login successful!");
     setTimeout(() => {
       if (data.user.profileComplete) {
-        navigate("/dashboard");
+         if (data.user.role === "HOD") {
+          navigate("/Hoddashboard");
+        } else if (data.user.role === "TEACHER") {
+          navigate("/Teacherdashboard");
+        }
+        else  {
+          navigate("/Studentdashboard");
+        }
       } else {
-        navigate("/profile");
+        if (data.user.role === "HOD") {
+          navigate("/Hodprofile");
+        } else if (data.user.role === "TEACHER") {
+          navigate("/Teacherprofile");
+        } else {
+          navigate("/Studentprofile");
+        }
       }
     }, 1200);
   } catch (error) {

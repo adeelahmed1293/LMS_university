@@ -50,18 +50,21 @@ router.post('/signup', async (req, res) => {
 
 router.post('/login', async (req, res) => {
   const { email, password, role } = req.body;
-
+  
   // Validate input
   if (!email || !password || !role) {
     return res.status(400).json({ message: 'Please fill in all fields (email, password, role).' });
   }
 
   try {
+  
     // Find user
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: 'Invalid email, password, or role.' });
+      
     }
+
 
     // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
@@ -122,5 +125,78 @@ router.post('/login', async (req, res) => {
     res.status(500).json({ message: 'Server error.' });
   }
 });
+
+router.put('/update/:id', async (req, res) => {
+  const { id } = req.params;
+  const {
+    fullName,
+    email,
+    password,
+    previousPassword,
+    confirmPassword,
+    role,
+    acceptedTerms,
+    profileComplete, // ✅ Added here
+  } = req.body;
+   console.log('the data of body is ',req.body);
+  // Basic validations
+  if (!fullName || !email || !role || acceptedTerms !== true) {
+    return res.status(400).json({ message: 'Please provide fullName, email, role, and accept the terms.' });
+  }
+
+  // If user wants to change password, check confirmPassword and previousPassword
+  if (password || confirmPassword || previousPassword) {
+    if (!previousPassword) {
+      return res.status(400).json({ message: 'Previous password is required to update password.' });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({ message: 'New passwords do not match.' });
+    }
+  }
+
+  try {
+    // Find user
+    const user = await User.findById(id);
+    if (!user) return res.status(404).json({ message: 'User not found.' });
+
+    // Check previous password if password change is requested
+    if (password && previousPassword) {
+      const isMatch = await bcrypt.compare(previousPassword, user.password);
+      if (!isMatch) {
+        return res.status(401).json({ message: 'Previous password is incorrect.' });
+      }
+    }
+
+    // Check if email is changing and already taken
+    if (email !== user.email) {
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return res.status(409).json({ message: 'Email already in use.' });
+      }
+    }
+
+    // Update user fields
+    user.fullName = fullName;
+    user.email = email;
+    user.role = role;
+    user.acceptedTerms = acceptedTerms;
+    user.profileComplete = profileComplete; // ✅ Added here
+
+    // Hash new password if it's being updated
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(password, salt);
+    }
+
+    await user.save();
+
+    return res.status(200).json({ message: 'User updated successfully.', user });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Server error.' });
+  }
+});
+
 
 module.exports = router;

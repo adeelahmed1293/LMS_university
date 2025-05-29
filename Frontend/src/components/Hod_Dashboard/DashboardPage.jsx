@@ -3,11 +3,13 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
 // Import dashboard content components
-import { StudentDashboard, TeacherDashboard, HODDashboard } from "../components/Dashboard/DashboardContent";
-import CoursesPage from "../components/Dashboard/CoursesPage";
-import TeachersPage from "../components/Dashboard/TeachersPage";
-import StudentsPage from "../components/Dashboard/StudentsPage";
-import SettingsPage from "../components/Dashboard/SettingsPage";
+import { StudentDashboard, TeacherDashboard, HODDashboard } from "./DashboardContent";
+import CoursesPage from "./CoursesPage";
+import TeachersPage from "./TeachersPage";
+import StudentsPage from "./StudentsPage";
+import SettingsPage from "./SettingsPage";
+import UpdateLoginCredentials from './UpdateLoginCredentials';
+import UpdateHodProfile from './UpdateHodProfile';
 
 const DashboardPage = () => {
   const [userRole, setUserRole] = useState("STUDENT");
@@ -15,6 +17,7 @@ const DashboardPage = () => {
   const [userData, setUserData] = useState(null);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [activeProfileSection, setActiveProfileSection] = useState('credentials');
   
   useEffect(() => {
     // Get user data from localStorage
@@ -55,9 +58,11 @@ const DashboardPage = () => {
         return <SettingsPage />;
       case "profile":
         return (
-          <div>
+          <div className="space-y-6">
             <h2 className="text-2xl font-bold mb-6">My Profile</h2>
-            <div className="bg-white rounded-lg p-6 shadow-md">
+            
+            {/* Profile Summary */}
+            <div className="bg-white rounded-lg p-6 shadow-md mb-6">
               <div className="flex flex-col items-center mb-6">
                 <div className="w-32 h-32 bg-gray-300 rounded-full mb-4 overflow-hidden">
                   {userData?.profileImage ? (
@@ -68,28 +73,54 @@ const DashboardPage = () => {
                     </div>
                   )}
                 </div>
-                <h3 className="text-xl font-semibold">{userData?.name || "User Name"}</h3>
+                <h3 className="text-xl font-semibold">{userData?.fullName || "User Name"}</h3>
                 <p className="text-gray-500">{userData?.email || "user@example.com"}</p>
                 <p className="text-blue-600 capitalize mt-1">{userData?.role || userRole}</p>
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div className="p-4 border rounded-lg">
-                  <h4 className="font-medium text-gray-700 mb-2">Contact Information</h4>
-                  <p className="text-gray-600"><span className="font-medium">Email:</span> {userData?.email || "user@example.com"}</p>
-                  <p className="text-gray-600"><span className="font-medium">Phone:</span> {userData?.phoneNumber || "Not provided"}</p>
-                </div>
-                <div className="p-4 border rounded-lg">
-                  <h4 className="font-medium text-gray-700 mb-2">Academic Information</h4>
-                  <p className="text-gray-600"><span className="font-medium">Department:</span> {userData?.departmentName || "Not provided"}</p>
-                  <p className="text-gray-600"><span className="font-medium">Qualification:</span> {userData?.qualification || "Not provided"}</p>
-                </div>
-              </div>
-              
-              <Link to="/profile" className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                Edit Profile
-              </Link>
             </div>
+
+            {/* Update Options */}
+            <div className="flex space-x-4 mb-6">
+              <button
+                onClick={() => setActiveProfileSection('credentials')}
+                className={`flex-1 py-2 px-4 rounded-lg transition ${
+                  activeProfileSection === 'credentials'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                Update Login Credentials
+              </button>
+              <button
+                onClick={() => setActiveProfileSection('profile')}
+                className={`flex-1 py-2 px-4 rounded-lg transition ${
+                  activeProfileSection === 'profile'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                Update HOD Profile
+              </button>
+            </div>
+
+            {/* Forms */}
+            {activeProfileSection === 'credentials' ? (
+              <UpdateLoginCredentials
+                userData={userData}
+                onUpdate={(data) => {
+                  // Handle login credentials update
+                  console.log('Updating credentials:', data);
+                }}
+              />
+            ) : (
+              <UpdateHodProfile
+                userData={userData}
+                onUpdate={(data) => {
+                  // Handle HOD profile update
+                  console.log('Updating HOD profile:', data);
+                }}
+              />
+            )}
           </div>
         );
       default:
@@ -263,7 +294,7 @@ const DashboardPage = () => {
               )}
             </div>
             <div className={`flex-1 text-left ${isSidebarCollapsed ? "lg:hidden" : ""}`}>
-              <p className="font-medium">{userData?.name || "User Name"}</p>
+              <p className="font-medium">{userData?.fullName || "User Name"}</p>
               <p className="text-xs opacity-75">View Profile</p>
             </div>
           </button>
@@ -301,4 +332,4 @@ const DashboardPage = () => {
   );
 };
 
-export default DashboardPage; 
+export default DashboardPage;

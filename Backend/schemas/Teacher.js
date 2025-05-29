@@ -1,21 +1,55 @@
-import mongoose from "mongoose";
+// teacher schema
+const mongoose = require('mongoose');
 
-const teacherSchema = new mongoose.Schema(
-  {
-    name: { type: String, required: true },
-    username: { type: String, required: true, unique: true },
-    surname: { type: String },
-    phoneno: { type: String },
-    address: { type: String },
-    image: { type: String }, // image URL or filename
-    gender: { type: String, enum: ["Male", "Female", "Other"] },
-    dateOfHire: { type: Date },
-    subjects: [{ type: String }],
-    dept_name: { type: String },
-    email: { type: String, required: true, unique: true },
-    createdPortals: [{ type: mongoose.Schema.Types.ObjectId, ref: "Portal" }],
+const teacherSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+    unique: true // Ensure one teacher profile per user
   },
-  { timestamps: true }
-);
+  address: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  gender: {
+    type: String,
+    required: true,
+    enum: ['Male', 'Female', 'Other']
+  },
+  dateOfHire: {
+    type: Date,
+    required: true
+  },
+  subjects: [{
+    type: String,
+    required: true,
+    trim: true
+  }],
+  dept_name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  qualification: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  date_of_birth: {
+    type: Date,
+    required: true
+  },
+  profile_image: {
+    data: Buffer,
+    contentType: String
+  }
+}, {
+  timestamps: true // Automatically adds createdAt and updatedAt fields
+});
 
-export default mongoose.model("Teacher", teacherSchema);
+
+const Teacher = mongoose.model('Teacher', teacherSchema);
+
+module.exports = Teacher;

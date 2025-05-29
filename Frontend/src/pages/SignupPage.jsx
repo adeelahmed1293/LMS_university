@@ -115,8 +115,24 @@ const SignupPage = () => {
       
       // Redirect to profile page
       setTimeout(() => {
-        navigate("/profile");
-      }, 1200);
+        if (loginData.user.profileComplete) {
+          if (loginData.user.role === "HOD") {
+            navigate("/Hoddashboard");
+          } else if (loginData.user.role === "TEACHER") {
+            navigate("/Teacherdashboard");
+          } else {
+            navigate("/Studentdashboard");
+          }
+        } else {
+          if (loginData.user.role === "HOD") {
+          navigate("/Hoddashboard");
+        }
+        else if (loginData.user.role === "TEACHER") {
+          navigate("/Teacherdashboard");
+        } else {
+          navigate("/Studentdashboard");
+        }
+      }}, 1200);
     } catch (error) {
       toast.error(error.message);
     }

@@ -102,16 +102,23 @@ router.post('/', authenticateToken, upload.single('profile_image'), async (req, 
   }
 });
 
-// Get HOD profile
-router.get('/:id', async (req, res) => {
+
+// Get HOD profile by User ID with base64 image
+router.get('/:userId', async (req, res) => {
   try {
-    const hod = await HOD.findById(req.params.id)
-      .populate('user', 'fullName email'); // Populate user data
-    
+    const { userId } = req.params;
+
+    const hod = await HOD.findOne({ user: userId }).populate('user', 'fullName email');
+
     if (!hod) {
-      return res.status(404).json({ message: 'HOD profile not found' });
+      return res.status(404).json({ message: 'HOD profile not found for this user' });
     }
-    
+
+    let profileImageBase64 = null;
+    if (hod.profile_image?.data) {
+      profileImageBase64 = `data:${hod.profile_image.contentType};base64,${hod.profile_image.data.toString('base64')}`;
+    }
+
     res.status(200).json({
       _id: hod._id,
       user: hod.user,
@@ -121,28 +128,18 @@ router.get('/:id', async (req, res) => {
       department_name: hod.department_name,
       qualification: hod.qualification,
       address: hod.address,
-      hasProfileImage: hod.profile_image ? true : false,
+      profile_image: profileImageBase64,
       createdAt: hod.createdAt,
       updatedAt: hod.updatedAt
     });
+
   } catch (error) {
+    console.error('Error retrieving HOD profile:', error);
     res.status(500).json({ message: error.message });
   }
 });
 
-// Retrieve the profile image
-router.get('/:id/profile-image', async (req, res) => {
-  try {
-    const hod = await HOD.findById(req.params.id);
-    if (!hod || !hod.profile_image || !hod.profile_image.data) {
-      return res.status(404).send('Image not found');
-    }
-    
-    res.set('Content-Type', hod.profile_image.contentType);
-    res.send(hod.profile_image.data);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
+
+
 
 module.exports = router;

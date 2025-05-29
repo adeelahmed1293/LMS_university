@@ -3,10 +3,9 @@ const bodyParser = require('body-parser');
 const connectDB = require('./db');
 const user = require('./routes/user_routes');
 const hod = require('./routes/hod_routes');
-const teacher = require('./routes/teacher_routes');
 const student = require('./routes/student_routes');
 const envChecker = require('./middleware/envChecker');
-
+const teacher =require('./routes/teacher_routes');
 const app = express();
 app.use(bodyParser.json());
 const cors = require('cors');
@@ -24,6 +23,7 @@ connectDB();
 
 app.use('/user', user);
 app.use('/hod_profile', hod);
+app.use('/teacher_profile', teacher);
 
 // Start Server
 const PORT = 3000;

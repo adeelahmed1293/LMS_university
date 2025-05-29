@@ -1,3 +1,4 @@
+//user schema
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
@@ -17,7 +18,7 @@ const userSchema = new Schema({
   },
   role: {
     type: String,
-    enum: ['STUDENT', 'INSTRUCTOR', 'HOD'],
+    enum: ['STUDENT', 'TEACHER', 'HOD'],
     default: 'STUDENT',
     required: true,
   },

@@ -5,9 +5,12 @@ import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import AboutPage from "./pages/AboutPage";
-import DashboardPage from "./pages/DashboardPage";
-import ProfilePage from "./pages/ProfilePage";
-
+import DashboardPage from "./components/Hod_Dashboard/DashboardPage";
+import HodProfilePage from "./components/Hod_Dashboard/HodProfilePage";
+import StudentProfilePage from "./components/Student_Dashboard/StudentProfilePage";
+import TeacherProfilePage from "./components/Teacher_Dashboard/TeacherProfilePage";
+import StudentDashboard from "./components/Student_Dashboard/studentDashboard";
+import TeacherDashboard from "./components/Teacher_Dashboard/TeacherDashboard";
 const App = () => {
   return (
     <Router>
@@ -17,8 +20,12 @@ const App = () => {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/about" element={<AboutPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/Hodprofile" element={<HodProfilePage />} />
+        <Route path="/Studentprofile" element={<StudentProfilePage />} />
+        <Route path="/Teacherprofile" element={<TeacherProfilePage />} />
+        <Route path="/Hoddashboard" element={<DashboardPage />} />
+        <Route path="/Studentdashboard" element={<StudentDashboard />} />
+        <Route path="/Teacherdashboard" element={<TeacherDashboard />} />
       </Routes>
     </Router>
   );
