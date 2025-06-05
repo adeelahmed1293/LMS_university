@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const connectDB = require('./db');
+const connectDB = require('./config/db');
 const user = require('./routes/user_routes');
 const hod = require('./routes/hod_routes');
 const student = require('./routes/student_routes');
@@ -9,6 +9,7 @@ const teacher =require('./routes/teacher_routes');
 const app = express();
 app.use(bodyParser.json());
 const cors = require('cors');
+const backupRoutes = require('./routes/backup_routes');
 
 app.use(cors({
   origin: 'http://localhost:5173', // or whatever your frontend URL is
@@ -24,6 +25,8 @@ connectDB();
 app.use('/user', user);
 app.use('/hod_profile', hod);
 app.use('/teacher_profile', teacher);
+app.use('/data', backupRoutes);
+
 
 // Start Server
 const PORT = 3000;
