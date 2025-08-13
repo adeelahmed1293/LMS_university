@@ -12,7 +12,7 @@ const cors = require('cors');
 const backupRoutes = require('./routes/backup_routes');
 
 app.use(cors({
-  origin: 'http://localhost:5173', // or whatever your frontend URL is
+  origin: 'https://lmsuniversityproject.vercel.app/', // or whatever your frontend URL is
   credentials: true,
 }));
 
