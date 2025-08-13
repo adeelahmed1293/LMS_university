@@ -67,7 +67,7 @@ const SignupPage = () => {
     }
   
     try {
-      const response = await fetch("https://lms-university-backend.vercel.app/user/signup", {
+      const response = await fetch("https://lms-university-theta.vercel.app/user/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
